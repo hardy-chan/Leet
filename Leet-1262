@@ -1,0 +1,63 @@
+# LeetCode 1262. Greatest Sum Divisible by Three
+#
+# Task: Given an integer array nums, return the maximum possible sum of elements of the array such that it is divisible by three.
+#
+# Strategy: Greedily, sum all positive numbers and subtract the smallest one or two numbers depending on remainder
+
+class Solution:
+    def maxSumDivThree(self, nums: List[int]) -> int:
+        # Compute the sum, and return when divisible by 3
+        maxSum = sum([n for n in nums if n>0])
+        if maxSum % 3 == 0:
+            return maxSum
+        # Create lists with positive numbers that are 1 resp. 2 mod 3
+        numsMod1, numsMod2 = self.makeNumsMod(nums)
+        # Subtract a smallest number from the sum, according to the case of 1 or 2 mod 3
+        if maxSum % 3 == 1:
+            maxSum -= self.subtractMod1(numsMod1, numsMod2)
+        if maxSum % 3 == 2:    
+            maxSum -= self.subtractMod2(numsMod1, numsMod2)
+        return maxSum
+    
+    # Create lists with positive numbers that are 1 resp. 2 mod 3
+    def makeNumsMod(self, nums: List[int]) -> (List[int], List[int]):
+        numsMod1 = []
+        numsMod2 = []
+        for n in nums:
+            if n % 3 == 1 and n > 0:
+                numsMod1.append(n)
+            elif n % 3 == 2 and n > 0:
+                numsMod2.append(n)
+        return numsMod1, numsMod2
+
+    # In the 1 mod 3 case, find the minimum of smallest number in 1 mod 3 and two smallest numbers in 2 mod 3, whenever exist
+    def subtractMod1(self, numsMod1: List[int], numsMod2: List[int]) -> int:
+        if len(numsMod1) >= 1 and len(numsMod2) >= 2:
+            numToSubtractFromMod1 = min(numsMod1)
+            numToSubtractFromMod2 = min(numsMod2)
+            numsMod2.remove(min(numsMod2))
+            numToSubtractFromMod2 += min(numsMod2)
+            return min(numToSubtractFromMod1, numToSubtractFromMod2)
+        elif len(numsMod1) < 1 and len(numsMod2) >= 2:
+            numToSubtract = min(numsMod2)
+            numsMod2.remove(min(numsMod2))
+            numToSubtract += min(numsMod2)
+            return numToSubtract
+        elif len(numsMod1) >= 1 and len(numsMod2) < 2:
+            return min(numsMod1)
+
+    # In the 2 mod 3 case, find the minimum of smallest number in 2 mod 3 and two smallest numbers in 1 mod 3, whenever exist
+    def subtractMod2(self, numsMod1: List[int], numsMod2: List[int]) -> int:
+        if len(numsMod2) >= 1 and len(numsMod1) >= 2:
+            numToSubtractFromMod2 = min(numsMod2)
+            numToSubtractFromMod1 = min(numsMod1)
+            numsMod1.remove(min(numsMod1))
+            numToSubtractFromMod1 += min(numsMod1)
+            return min(numToSubtractFromMod1, numToSubtractFromMod2)            
+        elif len(numsMod2) < 1 and len(numsMod1) >= 2:
+            numToSubtract = min(numsMod1)
+            numsMod1.remove(min(numsMod1))
+            numToSubtract += min(numsMod1)
+            return numToSubtract
+        elif len(numsMod2) >= 1 and len(numsMod1) < 2:
+            return min(numsMod2)
